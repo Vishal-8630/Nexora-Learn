@@ -1,29 +1,25 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Menu, X } from "lucide-react";
 import { SidebarNav } from "./SidebarNav";
 
 export function MobileSidebarTrigger() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const match = pathname.match(/^\/learn\/([^\/]+)/);
   const courseId = match ? match[1] : "dynamics";
 
-  return (
+  const sidebarContent = (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="lg:hidden flex h-9 w-9 items-center justify-center rounded-lg
-          text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]
-          hover:bg-[hsl(var(--surface-hover))] transition-colors shrink-0"
-        aria-label="Open navigation menu"
-      >
-        <Menu className="h-5 w-5" />
-      </button>
-
       {/* Backdrop */}
       {open && (
         <div
@@ -68,6 +64,22 @@ export function MobileSidebarTrigger() {
           <SidebarNav courseId={courseId} onNavigate={() => setOpen(false)} />
         </div>
       </aside>
+    </>
+  );
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="lg:hidden flex h-9 w-9 items-center justify-center rounded-lg
+          text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]
+          hover:bg-[hsl(var(--surface-hover))] transition-colors shrink-0"
+        aria-label="Open navigation menu"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
+      {mounted && createPortal(sidebarContent, document.body)}
     </>
   );
 }
